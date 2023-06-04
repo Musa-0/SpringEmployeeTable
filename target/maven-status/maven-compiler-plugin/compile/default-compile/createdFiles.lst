@@ -1,0 +1,7 @@
+org/musa/spring/mvc_hibernate_aop/entity/Employee.class
+org/musa/spring/mvc_hibernate_aop/controller/MyController.class
+org/musa/spring/mvc_hibernate_aop/aspect/MyLoggingAspect.class
+org/musa/spring/mvc_hibernate_aop/service/EmployeeServiceImpl.class
+org/musa/spring/mvc_hibernate_aop/dao/EmployeeDAOImpl.class
+org/musa/spring/mvc_hibernate_aop/service/EmployeeService.class
+org/musa/spring/mvc_hibernate_aop/dao/EmploteeDAO.class

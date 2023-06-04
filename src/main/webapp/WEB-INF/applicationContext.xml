@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+<!--создадим конфигурацию проекта, через XML файл, так проще-->
+    <context:component-scan base-package="org.musa.spring.mvc_hibernate_aop" />
+    <!--указываем где будет проходить сканирование-->
+    <mvc:annotation-driven/>
+    <aop:aspectj-autoproxy/><!--прописываем это для работы с aop а именно аспект классами-->
+
+    <bean
+            class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/view/" />
+        <property name="suffix" value=".jsp" />
+    </bean><!--создаем префикс и суффикс-->
+
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+          destroy-method="close"><!--используем готовый класс для создания пула этих подключений и сессий-->
+        <property name="driverClass" value="org.postgresql.Driver" />
+        <property name="jdbcUrl" value="jdbc:postgresql://localhost:5432/YOUR_DB?useSSL=false&amp;serverTimezone=UTC" />
+        <property name="user" value="USERNAME" />
+        <property name="password" value="PASSWORD" />
+    </bean><!--подключим бд с помщью c3p0. это общий пул для подключения к бд. в отличии от стандартных
+     подключений JDBC, которые очень затратные. это подключение. хранится ещё некоторое время. и если вновь
+     обратиться к бд, то новое создавать не нужно. и это более производительней-->
+
+    <bean id="sessionFactory"
+          class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" /><!--ссылается на наш пул подключений к бд-->
+        <property name="packagesToScan" value="org.musa.spring.mvc_hibernate_aop.entity" /><!--указываем пакет для сканирования наших Entity классов-->
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQL9Dialect</prop>
+                <prop key="hibernate.show_sql">true</prop><!--чтобы мы видели в терминале какие запросы выполняются-->
+            </props>
+        </property>
+    </bean><!--это бин для создания сессий который будет брать сессии из пула, что мы прописали выше-->
+
+    <bean id="transactionManager"
+          class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/><!--указываем ссылку на бин производства сессий-->
+    </bean><!--с помощью этого конфига мы можем больше не открывать и закрывать транзакции, можно по желанию конечно
+    но даже без этого, Hibernate теперь сделает это за нас. чтобы hibernate делал транзакции для нас
+    нужно будет использовать аннотацию @Transactional-->
+
+    <tx:annotation-driven transaction-manager="transactionManager" /><!--а для активации аннотации
+    @Transactional-->
+
+
+</beans>
+
